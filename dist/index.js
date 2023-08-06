@@ -18,6 +18,8 @@ const socket_io_1 = require("socket.io");
 const db_connect_1 = __importDefault(require("./config/db-connect"));
 const cors_1 = __importDefault(require("cors"));
 const user_1 = __importDefault(require("./routes/user"));
+const message_1 = require("./models/message");
+const constants_1 = require("./constants");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
@@ -37,4 +39,16 @@ const io = new socket_io_1.Server(server, {
 });
 io.on("connection", (socket) => {
     console.log("client connection", socket.id);
+    socket.on("join", ({ userID, socketID }) => __awaiter(void 0, void 0, void 0, function* () {
+        let messages = yield message_1.MessageModel.find({ user: userID });
+        if (messages.length === 0) {
+            let message = new message_1.MessageModel({
+                user: userID,
+                isUser: false,
+                text: constants_1.welcomeMessage,
+            });
+            messages.push(message);
+        }
+        io.to(socketID).emit("previousMessage", messages);
+    }));
 });

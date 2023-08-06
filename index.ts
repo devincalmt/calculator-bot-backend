@@ -4,6 +4,8 @@ import { Server, Socket } from "socket.io";
 import connectDB from "./config/db-connect";
 import cors from "cors";
 import routes from "./routes/user";
+import { MessageModel } from "./models/message";
+import { welcomeMessage } from "./constants";
 
 dotenv.config();
 
@@ -31,4 +33,16 @@ const io = new Server(server, {
 
 io.on("connection", (socket: Socket) => {
   console.log("client connection", socket.id);
+  socket.on("join", async ({ userID, socketID }) => {
+    let messages = await MessageModel.find({ user: userID });
+    if (messages.length === 0) {
+      let message = new MessageModel({
+        user: userID,
+        isUser: false,
+        text: welcomeMessage,
+      });
+      messages.push(message);
+    }
+    io.to(socketID).emit("previousMessage", messages);
+  });
 });
