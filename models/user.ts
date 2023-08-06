@@ -12,6 +12,11 @@ const user = new mongoose.Schema(
   { timestamps: true }
 );
 
+user.pre("save", function (next) {
+  this.email = this.email.toLowerCase();
+  next();
+});
+
 const UserModel = mongoose.model("user", user);
 
 export { UserModel }

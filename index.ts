@@ -3,12 +3,16 @@ import dotenv from "dotenv";
 import { Server, Socket } from "socket.io";
 import connectDB from "./config/db-connect";
 import cors from "cors";
+import routes from "./routes/user";
 
 dotenv.config();
 
 const app: Express = express();
 
 app.use(cors());
+app.use(express.json());
+
+app.use("/api", routes);
 
 const port = process.env.PORT || 5000;
 

@@ -13,5 +13,9 @@ const user = new mongoose_1.default.Schema({
         trim: true,
     },
 }, { timestamps: true });
+user.pre("save", function (next) {
+    this.email = this.email.toLowerCase();
+    next();
+});
 const UserModel = mongoose_1.default.model("user", user);
 exports.UserModel = UserModel;

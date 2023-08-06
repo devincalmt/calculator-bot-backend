@@ -17,9 +17,12 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const socket_io_1 = require("socket.io");
 const db_connect_1 = __importDefault(require("./config/db-connect"));
 const cors_1 = __importDefault(require("cors"));
+const user_1 = __importDefault(require("./routes/user"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
+app.use(express_1.default.json());
+app.use("/api", user_1.default);
 const port = process.env.PORT || 5000;
 const server = app.listen(port, () => __awaiter(void 0, void 0, void 0, function* () {
     const DB_URI = process.env.DB_URI || "mongodb://localhost:27017/bot_calculator";
