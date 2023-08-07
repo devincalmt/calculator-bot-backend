@@ -14,6 +14,10 @@ const message = new mongoose.Schema(
     text: {
       type: String,
     },
+    isOperation: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

@@ -18,6 +18,10 @@ const message = new mongoose_1.default.Schema({
     text: {
         type: String,
     },
+    isOperation: {
+        type: Boolean,
+        default: false,
+    },
 }, {
     timestamps: true,
 });
