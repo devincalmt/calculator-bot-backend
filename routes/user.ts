@@ -1,7 +1,9 @@
 import { Request, Response, Router } from "express";
 import { UserModel } from "../models/user";
+import { MessageModel } from "../models/message";
+import { welcomeMessage } from "../constants";
 
-const router = Router()
+const router = Router();
 
 router.post("/login", async (req: Request, res: Response) => {
   try {
@@ -16,6 +18,11 @@ router.post("/login", async (req: Request, res: Response) => {
 
     if (!findUser) {
       findUser = await UserModel.create({ email });
+      let message = await MessageModel.create({
+        user: findUser._id,
+        isUser: false,
+        text: welcomeMessage,
+      });
     }
 
     return res.status(200).json({ success: true, data: findUser._id });

@@ -19,7 +19,7 @@ const db_connect_1 = __importDefault(require("./config/db-connect"));
 const cors_1 = __importDefault(require("cors"));
 const user_1 = __importDefault(require("./routes/user"));
 const message_1 = require("./models/message");
-const constants_1 = require("./constants");
+const mathjs_1 = __importDefault(require("mathjs"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
@@ -37,18 +37,64 @@ const io = new socket_io_1.Server(server, {
         origin: "*",
     },
 });
+const isValidOperationFormat = (input) => {
+    // Regular expression to match the format "/operation expression"
+    const regex = /^\/operation\s[\s\S]+$/;
+    if (!regex.test(input)) {
+        return false;
+    }
+    const expression = input.slice("/operation ".length);
+    try {
+        const result = mathjs_1.default.evaluate(expression);
+        return { expression, result };
+    }
+    catch (error) {
+        return false;
+    }
+};
 io.on("connection", (socket) => {
-    console.log("client connection", socket.id);
     socket.on("join", ({ userID, socketID }) => __awaiter(void 0, void 0, void 0, function* () {
-        let messages = yield message_1.MessageModel.find({ user: userID });
-        if (messages.length === 0) {
-            let message = new message_1.MessageModel({
-                user: userID,
-                isUser: false,
-                text: constants_1.welcomeMessage,
-            });
-            messages.push(message);
+        try {
+            console.log("client connection", socket.id);
+            let messages = yield message_1.MessageModel.find({ user: userID });
+            io.to(socketID).emit("previousMessage", messages);
         }
-        io.to(socketID).emit("previousMessage", messages);
+        catch (error) { }
+    }));
+    socket.on("sendMessage", ({ socketID, userID, text }) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            let isOperation = false;
+            let reply = null;
+            if (text === "/history") {
+                reply = yield message_1.MessageModel.find({ isOperation: true, user: userID })
+                    .sort({ createdAt: -1 })
+                    .limit(10);
+            }
+            else {
+                let ans = isValidOperationFormat(text);
+                if (ans === false) {
+                    reply = "Sorry invalid command";
+                }
+                else {
+                    isOperation = true;
+                    const { result, expression } = ans;
+                    reply = `${expression} = ${result}`;
+                }
+            }
+            const newMessage = yield message_1.MessageModel.create({
+                isUser: true,
+                user: userID,
+                text,
+            });
+            io.to(socketID).emit("receiveMessage", newMessage);
+            const replyMessage = yield message_1.MessageModel.create({
+                isUser: false,
+                user: userID,
+                text: reply,
+                isOperation,
+            });
+            io.to(socketID).emit("receiveMessage", replyMessage);
+        }
+        catch (error) { }
     }));
 });

@@ -11,6 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const user_1 = require("../models/user");
+const message_1 = require("../models/message");
+const constants_1 = require("../constants");
 const router = (0, express_1.Router)();
 router.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -23,6 +25,11 @@ router.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* 
         let findUser = yield user_1.UserModel.findOne({ email });
         if (!findUser) {
             findUser = yield user_1.UserModel.create({ email });
+            let message = yield message_1.MessageModel.create({
+                user: findUser._id,
+                isUser: false,
+                text: constants_1.welcomeMessage,
+            });
         }
         return res.status(200).json({ success: true, data: findUser._id });
     }
