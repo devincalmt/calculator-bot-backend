@@ -19,7 +19,8 @@ app.use("/api", routes);
 const port = process.env.PORT || 5000;
 
 const server = app.listen(port, async () => {
-  const DB_URI = process.env.DB_URI || "mongodb://localhost:27017/bot_calculator";
+  const DB_URI =
+    process.env.DB_URI || "mongodb://localhost:27017/bot_calculator";
   await connectDB(DB_URI);
   console.log("connected to MongoDB");
   console.log("Server listening on port " + port);
@@ -27,7 +28,7 @@ const server = app.listen(port, async () => {
 
 const io = new Server(server, {
   cors: {
-  origin: "*",
+    origin: "*",
   },
 });
 
@@ -35,19 +36,19 @@ const isValidOperationFormat = (input: string) => {
   // Regular expression to match the format "/operation expression"
   const regex = /^\/operation\s[\s\S]+$/;
   if (!regex.test(input)) {
-  return false;
-}
+    return false;
+  }
 
-const expression = input.slice("/operation ".length);
+  const expression = input.slice("/operation ".length);
   try {
     const result = math.evaluate(expression);
     return { expression, result };
   } catch (error) {
     return false;
   }
-}
+};
 
-io.on("connection", (socket) => {
+io.on("connection", (socket: Socket) => {
   socket.on("join", async ({ userID, socketID }) => {
     try {
       console.log("client connection", socket.id);
