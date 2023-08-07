@@ -104,3 +104,5 @@ io.on("connection", (socket: Socket) => {
     } catch (error) {}
   });
 });
+
+export default app;
